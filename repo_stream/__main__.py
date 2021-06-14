@@ -1,17 +1,23 @@
 """repo-stream command line interface"""
 
-from repo_stream import __version__
-from repo_stream.update import update
-from repo_stream.github import install_github_auth
+import argparse
 
-DESCRIPTION = ("Run all configured repo-stream hooks for a set of"
-               " Github users/organizations.")
+from repo_stream import __version__
+from repo_stream.github import install_github_auth
+from repo_stream.update import update
+
+
+DESCRIPTION = (
+    "Run all configured repo-stream hooks for a set of Github users/organizations."
+)
 
 
 def build_parser():
-    parser = argparse.ArgumentParser(
-        version=__version__,
-        description=DESCRIPTION,
+    parser = argparse.ArgumentParser(description=DESCRIPTION)
+    parser.add_argument(
+        '-v', '--version', action='version',
+        version=f'%(prog)s {__version__}',
+        help='Show program version number and exit.',
     )
     parser.add_argument("usernames", nargs="*")
     parser.add_argument(
@@ -24,15 +30,15 @@ def build_parser():
             " stderr."
         ),
     )
-    
+
     return parser
 
 
 def main():
     parser = build_parser()
-    
+
     args = parser.parse_args()
-    
+
     install_github_auth()
 
     try:
@@ -41,6 +47,7 @@ def main():
         raise
     else:
         return 0
+
 
 if __name__ == "__main__":
     exit(main())

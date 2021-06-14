@@ -1,19 +1,24 @@
 """Github related utilities."""
 
+import json
+import os
+import time
+import urllib.request
+
 
 def repo_url_to_full_name(url):
     """Converts a repository absolute URL to ``full_name`` format used by
     Github.
-    
+
     Parameters
     ----------
-    
+
     url : str
       URL of the repository.
-    
+
     Returns
     -------
-    
+
     url : str
       Full name of the repository accordingly with Github API.
     """
@@ -22,16 +27,16 @@ def repo_url_to_full_name(url):
 
 def get_user_repos(username):
     """Returns all the repositories of a Github user.
-    
+
     Parameters
     ----------
-    
+
     username : str
       Github user whose repositories will be returned.
 
     Returns
     -------
-    
+
     list : All the full names of the user repositories.
     """
     repos = []
@@ -57,17 +62,17 @@ def get_user_repos(username):
             repos.extend([repo["full_name"] for repo in res])
             page += 1
 
-        time.sleep(.04)
+        time.sleep(0.1)
 
     return repos
 
 
 def install_github_auth():
-    """Install Github authentication headers as request opener for urllib.""" 
+    """Install Github authentication headers as request opener for urllib."""
     GITHUB_USERNAME = os.environ.get("GITHUB_USERNAME")
     GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
-    
+
     if GITHUB_USERNAME is not None and GITHUB_TOKEN is not None:
         opener = urllib.request.build_opener()
-        opener.addheaders = [('Authorization', f"token {GITHUB_TOKEN}")]
+        opener.addheaders = [("Authorization", f"token {GITHUB_TOKEN}")]
         urllib.request.install_opener(opener)

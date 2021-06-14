@@ -82,7 +82,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-> If you want to update other repositories not published under your user, pass
+- If you want to update other repositories not published under your user, pass
 them as parameters of `repo-stream <your-username> <other-username>`.
-
-![---](sep2.png)
+- `GITHUB_USERNAME` and `GITHUB_TOKEN` are required in order to open pull
+ requests with that account.
