@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/mondeja/repo-stream/master/repo-stream.png" alt="repo-stream">
+  <img src="images/repo-stream.png" alt="repo-stream">
 </p>
 
 Cron-based remote pre-commit executions by opening pull requests.
@@ -15,7 +15,7 @@ pre-commit using another remote configuration file. If this execution edit file
 contents, opens a pull request against the repository.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/mondeja/repo-stream/master/sep1.png">
+  <img src="images/sep1.png">
 </p>
 
 So you can use **repo-stream** to run one-time pre-commit hooks for all your
@@ -25,13 +25,12 @@ repositories without have to define them inside the configuration of each one.
 
 1. Create a `repo-stream` hook in your pre-commit configuration. If this is
  found, repo-stream will search a pre-commit configuration file at
- `upstream.yaml` under `https://github.com/<your-username>/<stream-config-repo>`
- and will run it against the current repository. If a hook makes a change, a
- pull request will be created.
+ `updater` under `config` repository and will run it against the current
+ repository. If a hook makes a change, a pull request will be created.
 
 ```yaml
 - repo: https://github.com/mondeja/repo-stream
-  rev: v1.0.0
+  rev: v0.0.1
   hooks:
     - id: repo-stream
       args:
@@ -46,7 +45,7 @@ repositories without have to define them inside the configuration of each one.
 
 ```yaml
 - repo: https://github.com/mondeja/pre-commit-hooks
-  rev: v1.0.0
+  rev: v1.1.0
   hooks:
     - id: add-pre-commit-hook
       args: 
@@ -77,10 +76,13 @@ jobs:
       - name: Install repo-stream
         run: pip install repo-stream
       - name: Run repo-stream update
-        run: repo-stream update <your-username>
+        run: repo-stream <your-username>
+        env:
+          GITHUB_USERNAME: <username-for-pull-requests>
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 > If you want to update other repositories not published under your user, pass
-them as parameters of `repo-stream update <your-username> <other-username>`.
+them as parameters of `repo-stream <your-username> <other-username>`.
 
 ![---](sep2.png)
