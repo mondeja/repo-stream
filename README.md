@@ -34,13 +34,13 @@ repositories without have to define them inside the configuration of each one.
   hooks:
     - id: repo-stream
       args:
-        - -config=https://github.com/mondeja/repo-stream-config
+        - -config=https://github.com/<your-username>/repo-stream-config
         - -updater=upstream
 ```
 
 2. Create your `repo-stream` configuration files repository, for example at
  `https://github.com/<your-username>/repo-stream-config`.
-3. Create the pre-commit configuration files, following this example would be
+3. Create the pre-commit configuration file, following this example would be
  at `upstream.yaml`, for example:
 
 ```yaml
@@ -65,7 +65,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  auto-update:
+  repo-stream-update:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
