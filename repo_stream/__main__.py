@@ -31,7 +31,6 @@ def build_parser():
         ),
     )
     parser.add_argument(
-        "-h",
         "--hook",
         action="store_true",
         dest="hook",
