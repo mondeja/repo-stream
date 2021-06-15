@@ -2,6 +2,7 @@
 
 import json
 import os
+import subprocess
 import sys
 import urllib.request
 from urllib.error import HTTPError
@@ -11,6 +12,7 @@ from pre_commit.main import main as pre_commit_run
 
 from repo_stream.git import (
     git_add_all_commit,
+    git_add_remote,
     git_push,
     git_random_checkout,
     repo_default_branch_name,
@@ -294,6 +296,14 @@ def update(
 
                     if not _pull_request_opened:
                         # pull request
+                        try:
+                            git_add_remote(
+                                repo["repo"],
+                                os.environ.get("GITHUB_TOKEN"),
+                                remote="origin",
+                            )
+                        except subprocess.CalledProcessError:
+                            pass
                         git_add_all_commit(title="repo-stream update")
                         git_push("origin", new_branch_name)
                         sys.stdout.write(f"Pushed branch '{new_branch_name}'")

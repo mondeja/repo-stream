@@ -119,6 +119,13 @@ def there_are_untracked_changes():
     return subprocess.check_output(["git", "diff", "--shortstat"]) != b""
 
 
+def git_add_remote(repo, token, remote="origin"):
+    """Add a remote to the current GIT repository."""
+    return subprocess.check_call(
+        ["git", "remote", "add", remote, f"https://{token}@github.com/{repo}.git"]
+    )
+
+
 def git_add_all_commit(title="repo-stream update", description=""):
     """Run ``git add .`` and ``git commit -m`` commands.
 
