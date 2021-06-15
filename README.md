@@ -8,6 +8,10 @@ Do you've a lot of old projects that are using deprecated configuration? Maybe
 you want to do a small change in a lot of projects at the same time, but you
 don't want to go one by one? Those are the reasons behind repo-stream.
 
+[![PyPI version][pypi-version-image]][pypi-link]
+[![Test][test-image]][test-link]
+[![Coverage status][coverage-image]][coverage-link]
+
 ## How does it work?
 
 Scans your repositories looking for pre-commit repo-stream hooks and run
@@ -82,5 +86,13 @@ them as parameters of `repo-stream <your-username> <other-username>`.
 - `GITHUB_TOKEN` is required in order to open pull requests with that account.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/mondeja/repo-stream/master/images/sep1.png">
+  <img src="https://raw.githubusercontent.com/mondeja/repo-stream/master/images/sep1.png" width="82%">
 </p>
+
+
+[pypi-version-image]: https://img.shields.io/pypi/v/repo-stream?label=version
+[pypi-link]: https://pypi.org/project/repo-stream
+[test-image]: https://img.shields.io/github/workflow/status/mondeja/repo-stream/CI?label=tests&logo=github
+[test-link]: https://github.com/mondeja/repo-stream/actions?query=workflow%3ACI
+[coverage-image]: https://img.shields.io/coveralls/github/mondeja/repo-stream?logo=coveralls
+[coverage-link]: https://coveralls.io/github/mondeja/repo-stream
