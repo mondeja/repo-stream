@@ -15,6 +15,7 @@ from repo_stream.git import (
     git_add_remote,
     git_push,
     git_random_checkout,
+    git_set_remote_url,
     repo_default_branch_name,
     there_are_untracked_changes,
     tmp_repo,
@@ -226,6 +227,9 @@ def update(
     """
     update_exitcode = 0
 
+    gh_username = os.environ.get("GITHUB_USERNAME")
+    gh_token = os.environ.get("GITHUB_TOKEN")
+
     for user_i, username in enumerate(usernames):
         sys.stdout.write(f"Processing '{username}' user: ")
         try:
@@ -265,7 +269,9 @@ def update(
         for repo in repos_stream_config:
             sys.stdout.write(f"Cloning '{repo['repo']}'...\n")
 
-            with tmp_repo(repo["repo"]) as repo_dirpath:
+            with tmp_repo(
+                repo["repo"], username=gh_username, token=gh_token
+            ) as repo_dirpath:
                 config_filepath = os.path.join(
                     os.path.abspath(os.path.dirname(repo_dirpath)),
                     "._pre-commit-config.yaml",
@@ -299,11 +305,18 @@ def update(
                         try:
                             git_add_remote(
                                 repo["repo"],
-                                os.environ.get("GITHUB_TOKEN"),
+                                gh_username,
+                                gh_token,
                                 remote="origin",
                             )
                         except subprocess.CalledProcessError:
                             pass
+                        git_set_remote_url(
+                            repo["repo"],
+                            gh_username,
+                            gh_token,
+                            remote="origin",
+                        )
                         git_add_all_commit(title="repo-stream update")
                         git_push("origin", new_branch_name)
                         sys.stdout.write(f"Pushed branch '{new_branch_name}'")

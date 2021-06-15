@@ -40,7 +40,7 @@ def repo_default_branch_name(repo):
 
 
 @contextlib.contextmanager
-def tmp_repo(repo, platform="github.com"):
+def tmp_repo(repo, username=None, token=None, platform="github.com"):
     """Create a temporal directory where clone a repository and move inside.
 
     Works as a context manager using ``with`` statement and when exits, comes
@@ -67,13 +67,14 @@ def tmp_repo(repo, platform="github.com"):
     try:
         with tempfile.TemporaryDirectory() as dirname:
             os.chdir(dirname)
+            auth_str = f"{username}:{token}@" if (username and token) else ""
             subprocess.check_call(
                 [
                     "git",
                     "clone",
                     "--quiet",
                     "--depth=1",
-                    f"https://{platform}/{repo}.git",
+                    f"https://{auth_str}{platform}/{repo}.git",
                 ]
             )
 
@@ -119,10 +120,29 @@ def there_are_untracked_changes():
     return subprocess.check_output(["git", "diff", "--shortstat"]) != b""
 
 
-def git_add_remote(repo, token, remote="origin"):
+def git_add_remote(repo, username, token, remote="origin"):
     """Add a remote to the current GIT repository."""
     return subprocess.check_call(
-        ["git", "remote", "add", remote, f"https://{token}@github.com/{repo}.git"]
+        [
+            "git",
+            "remote",
+            "add",
+            remote,
+            f"https://{username}:{token}@github.com/{repo}.git",
+        ]
+    )
+
+
+def git_set_remote_url(repo, username, token, remote="origin"):
+    """Set the URL of a remote for the current GIT repository."""
+    return subprocess.check_call(
+        [
+            "git",
+            "remote",
+            "set-url",
+            remote,
+            f"https://{username}:{token}@github.com/{repo}.git",
+        ]
     )
 
 

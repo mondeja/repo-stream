@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/mondeja/repo-stream/master/images/repo-stream.png" alt="repo-stream" width="95%">
+  <img src="https://raw.githubusercontent.com/mondeja/repo-stream/master/images/repo-stream.png" alt="repo-stream" width="90%">
 </p>
 
 Cron-based remote pre-commit executions by opening pull requests.
@@ -30,7 +30,7 @@ repositories without have to define them inside the configuration of each one.
 
 ```yaml
 - repo: https://github.com/mondeja/repo-stream
-  rev: v1.0.1
+  rev: v1.0.2
   hooks:
     - id: repo-stream
       args:
@@ -78,12 +78,14 @@ jobs:
       - name: Run repo-stream update
         run: repo-stream <your-username>
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_USERNAME: <your-username>
 ```
 
+- ``GH_TOKEN`` must be a secret configured for the repository with the Github
+ user token of `<your-username>` user.
 - If you want to update other repositories not published under your user, pass
 them as parameters of `repo-stream <your-username> <other-username>`.
-- `GITHUB_TOKEN` is required in order to open pull requests with that account.
 
 ## Current limitations
 
