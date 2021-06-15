@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/mondeja/repo-stream/master/images/repo-stream.png" alt="repo-stream">
+  <img src="https://raw.githubusercontent.com/mondeja/repo-stream/master/images/repo-stream.png" alt="repo-stream" width="95%">
 </p>
 
 Cron-based remote pre-commit executions by opening pull requests.
