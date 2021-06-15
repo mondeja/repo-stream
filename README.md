@@ -30,7 +30,7 @@ repositories without have to define them inside the configuration of each one.
 
 ```yaml
 - repo: https://github.com/mondeja/repo-stream
-  rev: v0.0.3
+  rev: v1.0.0
   hooks:
     - id: repo-stream
       args:
@@ -94,7 +94,7 @@ them as parameters of `repo-stream <your-username> <other-username>`.
 </p>
 
 
-[pypi-version-image]: https://img.shields.io/pypi/v/repo-stream?label=version
+[pypi-version-image]: https://img.shields.io/pypi/v/repo-stream?label=version&logo=pypi&logoColor=white
 [pypi-link]: https://pypi.org/project/repo-stream
 [test-image]: https://img.shields.io/github/workflow/status/mondeja/repo-stream/CI?label=tests&logo=github
 [test-link]: https://github.com/mondeja/repo-stream/actions?query=workflow%3ACI

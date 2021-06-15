@@ -296,7 +296,7 @@ def update(
                         # pull request
                         git_add_all_commit(title="repo-stream update")
                         git_push("origin", new_branch_name)
-                        sys.stdout.write(f"Pusing branch '{new_branch_name}'")
+                        sys.stdout.write(f"Pushed branch '{new_branch_name}'")
 
                         if dry_run:
                             sys.stdout.write(
