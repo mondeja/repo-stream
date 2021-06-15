@@ -1,9 +1,7 @@
 """repo-stream update command"""
 
-import functools
 import json
 import os
-import re
 import sys
 import urllib.request
 from urllib.error import HTTPError
@@ -29,7 +27,7 @@ from repo_stream.github import (
 )
 
 
-def parse_repo_stream_hook_args(args):
+def _parse_repo_stream_hook_args(args):
     response = {}
 
     _next_is_config, _next_is_updater = (False, False)
@@ -58,6 +56,15 @@ def parse_repo_stream_hook_args(args):
 
 
 def filter_repos_with_repo_stream_hook(repos):
+    """Filter repositories which have a pre-commit configuration file and
+    repo-stream hook defined inside it.
+
+    Parameters
+    ----------
+
+    repos : list
+      Repositories of a Github user.
+    """
     response = []
 
     for repo in repos:
@@ -84,17 +91,13 @@ def filter_repos_with_repo_stream_hook(repos):
                 file_content = file_req.read().decode("utf-8")
 
                 pc_config = yaml.safe_load(file_content)
-                
-                _found_repo_stream = False
 
                 for pc_repo in pc_config["repos"]:
                     if pc_repo["repo"] == "https://github.com/mondeja/repo-stream":
                         for hook in pc_repo["hooks"]:
                             if hook["id"] == "repo-stream":
-                                hook_args = parse_repo_stream_hook_args(
-                                    hook["args"]
-                                )
-                                
+                                hook_args = _parse_repo_stream_hook_args(hook["args"])
+
                                 sys.stdout.write(
                                     f" - Found: config={hook_args['config']}"
                                     f" updater={hook_args['updater']}\n"
@@ -112,6 +115,17 @@ def filter_repos_with_repo_stream_hook(repos):
 
 
 def get_stream_config_pre_commit_configurations(repos_stream_config):
+    """Add to repo-stream configurations for all collected repositories the
+    content of the pre-commit configuration file that will be used to perform
+    the update.
+
+    Parameters
+    ----------
+
+    repos_stream_config : list
+      Collected repositories with repo-stream configurations searching in
+      Github repositories for users.
+    """
     for i, repo in enumerate(repos_stream_config):
         try:
             repos_stream_config[i]["updater_content"] = download_raw_githubusercontent(
@@ -133,53 +147,51 @@ def get_stream_config_pre_commit_configurations(repos_stream_config):
 
 
 def check_pr_already_opened(repo, branch_prefix):
-    """Check if a repo-stream update pull request is already opened for a
+    """Check if a repo-stream update pull request is already opened given a
     configuration.
-    
+
     Parameters
     ----------
-    
+
     repo : dict
       Repository object. This must contain the fields ``repo`` with the name
       of the repository to check, a ``config`` with the repository used to
       extract the pre-commit configuration for this update and a ``updater``
       value with a file path where the configuration is located.
-    
+
     branch_prefix : str
       Prefix that must starts with the head reference of the pull request to
       consider that is a repo-stream update pull request.
 
     Returns
     -------
-    
+
     bool : Indicates if the pull request is already opened, so there is no
       need to open another.
-    """ 
+    """
     # get pull requests to see if there is one already open
     response = False
     prs = get_github_prs_number_head_body(repo["repo"])
     for number, head, body in prs:
         if not head.startswith(branch_prefix):
             continue
-        
+
         config, updater = (None, None)
         for line in body.splitlines():
             if "config=" in line:
                 config = line.split("config=")[1].strip()
             elif "updater=" in line:
                 updater = line.split("updater=")[1].strip()
-        if (
-            config == repo["config"]
-            and updater == repo["updater"]
-        ):
+        if config == repo["config"] and updater == repo["updater"]:
             sys.stdout.write(
                 f"Pull request #{number} already opened"
                 f" for update using '{config}/"
                 f"{updater}.yaml' configuration.\n"
             )
             response = True
-    
+
     return response
+
 
 def update(
     usernames,
@@ -193,25 +205,25 @@ def update(
 
     Parameters
     ----------
-    
+
     usernames : list
       Users for which to get repositories.
-    
+
     dry_run : bool, optional
       Don't make pull requests, just prints to STDOUT when pull requests would
       be opened.
-    
+
     include_forks : bool, optional
       Include forks of repositories stored by the user in its Github account.
-    
-    
+
+
     Returns
     -------
-    
+
     int : ``0`` if no errors happened, ``1`` otherwise.
     """
     update_exitcode = 0
-    
+
     for user_i, username in enumerate(usernames):
         sys.stdout.write(f"Processing '{username}' user: ")
         try:
@@ -221,13 +233,11 @@ def update(
             )
         except HTTPError as err:
             if err.code == 404:
-                sys.stderr.write(
-                    f"User '{username}' does not exists in Github.\n"
-                )
+                sys.stderr.write(f"User '{username}' does not exists in Github.\n")
                 update_exitcode = 1
                 continue
             raise err
-        
+
         n_user_repos = len(user_repos)
         if n_user_repos:
             msg = f"{n_user_repos}"
@@ -253,7 +263,7 @@ def update(
         for repo in repos_stream_config:
             sys.stdout.write(f"Cloning '{repo['repo']}'...\n")
 
-            with tmp_repo(repo['repo']) as repo_dirpath:
+            with tmp_repo(repo["repo"]) as repo_dirpath:
                 config_filepath = os.path.join(
                     os.path.abspath(os.path.dirname(repo_dirpath)),
                     "._pre-commit-config.yaml",
@@ -281,7 +291,7 @@ def update(
                         repo,
                         branch_prefix,
                     )
-                    
+
                     if not _pull_request_opened:
                         # pull request
                         git_add_all_commit(title="repo-stream update")
@@ -320,7 +330,7 @@ def update(
                                 f" '{created_pr['user']['login']}'.\n  You can"
                                 f" see it at {created_pr['html_url']}\n"
                             )
-                            
+
                 else:
                     sys.stdout.write("Repository is updated\n")
 

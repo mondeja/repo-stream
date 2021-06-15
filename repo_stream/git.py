@@ -1,12 +1,9 @@
 """GIT utilities for repo-stream."""
 
 import contextlib
-import json
 import os
 import subprocess
 import tempfile
-import urllib.parse
-import urllib.request
 import uuid
 
 
@@ -88,7 +85,7 @@ def tmp_repo(repo, platform="github.com"):
 
 
 def git_random_checkout(quiet=True, length=8, prefix=""):
-    """Creates a new branch with a random name of certain length.
+    """Create a new branch with a random name of certain length.
 
     Parameters
     ----------
@@ -116,13 +113,24 @@ def git_random_checkout(quiet=True, length=8, prefix=""):
 
 
 def there_are_untracked_changes():
-    """Indicates if in the current GIT repository there are files with
+    """Indicate if in the current GIT repository there are files with
     untracked changes.
     """
     return subprocess.check_output(["git", "diff", "--shortstat"]) != b""
 
 
-def git_add_all_commit(title="", description=""):
+def git_add_all_commit(title="repo-stream update", description=""):
+    """Run ``git add .`` and ``git commit -m`` commands.
+
+    Parameters
+    ----------
+
+    title : str, optional
+      Commit title.
+
+    description : str, optional
+      Commit description.
+    """
     subprocess.check_call(["git", "add", "."])
 
     commit_args = []
@@ -132,5 +140,16 @@ def git_add_all_commit(title="", description=""):
     return subprocess.check_call(["git", "commit", *commit_args])
 
 
-def git_push(source, target):
-    subprocess.check_call(["git", "push", source, target])
+def git_push(remote, target):
+    """Run ``git push <remote> <target>`` command.
+
+    Parameters
+    ----------
+
+    remote : str
+      Remote name.
+
+    target : str
+      Branch to be pushed.
+    """
+    subprocess.check_call(["git", "push", remote, target])

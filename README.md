@@ -78,11 +78,9 @@ jobs:
       - name: Run repo-stream update
         run: repo-stream <your-username>
         env:
-          GITHUB_USERNAME: <username-for-pull-requests>
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 - If you want to update other repositories not published under your user, pass
 them as parameters of `repo-stream <your-username> <other-username>`.
-- `GITHUB_USERNAME` and `GITHUB_TOKEN` are required in order to open pull
- requests with that account.
+- `GITHUB_TOKEN` is required in order to open pull requests with that account.

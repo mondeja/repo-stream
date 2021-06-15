@@ -14,9 +14,11 @@ DESCRIPTION = (
 def build_parser():
     parser = argparse.ArgumentParser(description=DESCRIPTION)
     parser.add_argument(
-        '-v', '--version', action='version',
-        version=f'%(prog)s {__version__}',
-        help='Show program version number and exit.',
+        "-v",
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
+        help="Show program version number and exit.",
     )
     parser.add_argument(
         "-d",
