@@ -30,7 +30,7 @@ repositories without have to define them inside the configuration of each one.
 
 ```yaml
 - repo: https://github.com/mondeja/repo-stream
-  rev: v0.0.2
+  rev: v0.0.3
   hooks:
     - id: repo-stream
       args:

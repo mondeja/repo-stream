@@ -1,6 +1,7 @@
 """repo-stream command line interface"""
 
 import argparse
+import sys
 
 from repo_stream import __version__
 from repo_stream.update import update
@@ -44,6 +45,8 @@ def build_parser():
         help="Include forked repositories getting all repositories from users.",
     )
     parser.add_argument("usernames", nargs="*")
+    parser.add_argument("-config", "--config", dest="ignoreme_config", default=None)
+    parser.add_argument("-updater", "--updater", dest="ignoreme_updater", default=None)
 
     return parser
 
@@ -55,6 +58,18 @@ def main():
     try:
         if args.hook:
             exitcode = 0
+            if not args.ignoreme_config:
+                sys.stderr.write(
+                    "You must define a repository for your configuration file"
+                    " using the argument '-config/--config'.\n"
+                )
+                exitcode = 1
+            if not args.ignoreme_updater:
+                sys.stderr.write(
+                    "You must define a configuration file for your updater"
+                    " using the argument '-updater/--updater'.\n"
+                )
+                exitcode = 1
         else:
             exitcode = update(
                 args.usernames,
@@ -68,4 +83,4 @@ def main():
 
 
 if __name__ == "__main__":
-    exit(main())
+    sys.exit(main())
