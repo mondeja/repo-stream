@@ -68,7 +68,10 @@ def test_add_github_auth_headers(github_token):
     if github_token is not None:
         os.environ["GITHUB_TOKEN"] = github_token
     else:
-        del os.environ["GITHUB_TOKEN"]
+        try:
+            del os.environ["GITHUB_TOKEN"]
+        except KeyError:
+            pass
 
     req = FakeRequest()
     add_github_auth_headers(req)
@@ -78,4 +81,7 @@ def test_add_github_auth_headers(github_token):
     if prev_github_token is not None:
         os.environ["GITHUB_TOKEN"] = prev_github_token
     else:
-        del os.environ["GITHUB_TOKEN"]
+        try:
+            del os.environ["GITHUB_TOKEN"]
+        except KeyError:
+            pass

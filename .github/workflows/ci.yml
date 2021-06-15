@@ -33,6 +33,8 @@ jobs:
           pip list
       - name: Test
         run: python -m pytest -svv --cov=repo_stream --cov-config=setup.cfg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Doctest
         run: python -m pytest
       - name: Coveralls

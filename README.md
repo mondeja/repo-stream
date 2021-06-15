@@ -14,10 +14,6 @@ Scans your repositories looking for pre-commit repo-stream hooks and run
 pre-commit using another remote configuration file. If this execution edit file
 contents, opens a pull request against the repository.
 
-<p align="center">
-  <img src="images/sep1.png">
-</p>
-
 So you can use **repo-stream** to run one-time pre-commit hooks for all your
 repositories without have to define them inside the configuration of each one. 
 
@@ -84,3 +80,7 @@ jobs:
 - If you want to update other repositories not published under your user, pass
 them as parameters of `repo-stream <your-username> <other-username>`.
 - `GITHUB_TOKEN` is required in order to open pull requests with that account.
+
+<p align="center">
+  <img src="images/sep1.png">
+</p>
