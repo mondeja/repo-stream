@@ -1,0 +1,6 @@
+- id: repo-stream
+  name: repo-stream
+  entry: repo-stream -h
+  description: Indicates that repo-stream will check this repository for updates.
+  language: python
+  pass_filenames: false

@@ -31,6 +31,14 @@ def build_parser():
         ),
     )
     parser.add_argument(
+        "-h",
+        "--hook",
+        action="store_true",
+        dest="hook",
+        help=("Run the repo-stream hook itself. Just exit with code 0 doing nothing."),
+    )
+    parser.add_argument(
+        "-i",
         "--include-forks",
         action="store_true",
         dest="include_forks",
@@ -46,11 +54,14 @@ def main():
     args = parser.parse_args()
 
     try:
-        exitcode = update(
-            args.usernames,
-            include_forks=args.include_forks,
-            dry_run=args.dry_run,
-        )
+        if args.hook:
+            exitcode = 0
+        else:
+            exitcode = update(
+                args.usernames,
+                include_forks=args.include_forks,
+                dry_run=args.dry_run,
+            )
     except Exception:
         raise
     else:

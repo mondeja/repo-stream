@@ -89,8 +89,6 @@ them as parameters of `repo-stream <your-username> <other-username>`.
 
 - Only works with Github repositories.
 
----
-
 <p align="center">
   <img src="https://raw.githubusercontent.com/mondeja/repo-stream/master/images/sep1.png" width="82%">
 </p>
