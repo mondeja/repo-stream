@@ -19,10 +19,15 @@ from repo_stream.git import (
         ("mondeja/mdpo", "master"),
         ("mondeja/repo-stream", "master"),
         ("PyCQA/isort", "main"),
+        ("mondeja/impossibleandcrazyfooname", subprocess.CalledProcessError),
     ),
 )
 def test_repo_default_branch_name(repo, expected_result):
-    assert repo_default_branch_name(repo) == expected_result
+    if hasattr(expected_result, "__traceback__"):
+        with pytest.raises(expected_result):
+            repo_default_branch_name(repo)
+    else:
+        assert repo_default_branch_name(repo) == expected_result
 
 
 @pytest.mark.parametrize(

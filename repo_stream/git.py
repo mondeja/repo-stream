@@ -87,7 +87,7 @@ def tmp_repo(repo, platform="github.com"):
         os.chdir(prev_cwd)
 
 
-def git_random_checkout(quiet=True, length=8):
+def git_random_checkout(quiet=True, length=8, prefix=""):
     """Creates a new branch with a random name of certain length.
 
     Parameters
@@ -99,13 +99,15 @@ def git_random_checkout(quiet=True, length=8):
     length : int, optional
       Length for the name of the new branch.
 
+    prefix : str, optional
+      Prepended at the beginning of the new branch name.
 
     Returns
     -------
 
     str : New branch name.
     """
-    new_branch_name = uuid.uuid4().hex[:length]
+    new_branch_name = f"{prefix}{uuid.uuid4().hex[:length]}"
     cmd = ["git", "checkout", "-b", new_branch_name]
     if quiet:
         cmd.append("--quiet")
@@ -126,24 +128,8 @@ def git_add_all_commit(title="", description=""):
     commit_args = []
     if title:
         commit_args.extend(["-m", title])
-    commit_args.extend(["-m", description or "Empty commit"])
+    commit_args.extend(["-m", description])
     return subprocess.check_call(["git", "commit", *commit_args])
-
-
-def create_github_pr(repo, title, body, head, base):
-    url = f"https://api.github.com/repos/{repo}/pulls"
-
-    data = urllib.parse.urlencode(
-        {
-            "title": title,
-            "body": body,
-            "head": head,
-            "base": base,
-        }
-    ).encode()
-
-    req = urllib.request.urlopen(urllib.request.Request(url, data=data))
-    return json.loads(req.read().encode("utf-8"))
 
 
 def git_push(source, target):

@@ -51,7 +51,7 @@ repositories without have to define them inside the configuration of each one.
       args: 
         - -repo=https://github.com/mondeja/pre-commit-hooks
         - -id=dev-extras-required
-        - -rev=v1.0.0
+        - -rev=v1.1.0
 ```
 
 4. Create the cron task using some platform like Github Actions:
