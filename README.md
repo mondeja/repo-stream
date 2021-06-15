@@ -44,14 +44,15 @@ repositories without have to define them inside the configuration of each one.
  at `upstream.yaml`, for example:
 
 ```yaml
-- repo: https://github.com/mondeja/pre-commit-hooks
-  rev: v1.1.0
-  hooks:
-    - id: add-pre-commit-hook
-      args: 
-        - -repo=https://github.com/mondeja/pre-commit-hooks
-        - -id=dev-extras-required
-        - -rev=v1.1.0
+repos:
+  - repo: https://github.com/mondeja/pre-commit-hooks
+    rev: v1.1.0
+    hooks:
+      - id: add-pre-commit-hook
+        args: 
+          - -repo=https://github.com/mondeja/pre-commit-hooks
+          - -id=dev-extras-required
+          - -rev=v1.1.0
 ```
 
 4. Create the cron task using some platform like Github Actions:
