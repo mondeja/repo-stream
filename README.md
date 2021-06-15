@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="images/repo-stream.png" alt="repo-stream">
+  <img src="https://raw.githubusercontent.com/mondeja/repo-stream/master/images/repo-stream.png" alt="repo-stream">
 </p>
 
 Cron-based remote pre-commit executions by opening pull requests.
@@ -82,5 +82,5 @@ them as parameters of `repo-stream <your-username> <other-username>`.
 - `GITHUB_TOKEN` is required in order to open pull requests with that account.
 
 <p align="center">
-  <img src="images/sep1.png">
+  <img src="https://raw.githubusercontent.com/mondeja/repo-stream/master/images/sep1.png">
 </p>
