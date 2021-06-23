@@ -3,6 +3,7 @@
 /docs/_build/
 /dev.md
 __dev__.py
+repositories-to-ignore.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -3,7 +3,6 @@
 import functools
 import json
 import os
-import time
 import urllib.request
 
 
@@ -25,7 +24,7 @@ def repo_url_to_full_name(url):
     return "/".join(url.split("/")[3:])
 
 
-def get_user_repos(username, fork=None):
+def get_user_repos(username, fork=None, repositories_to_ignore=[]):
     """Get all the repositories of a Github user.
 
     Parameters
@@ -38,6 +37,9 @@ def get_user_repos(username, fork=None):
       If is ``True``, only forked repositories will be returned, if is
       ``False``, only non forked repositories will be returned and being
       ``None`` both forked and unforked repositories will be returned.
+
+    repositories_to_ignore : list, optional
+      Full name of repositories which will not be included in the response.
 
     Returns
     -------
@@ -64,22 +66,42 @@ def get_user_repos(username, fork=None):
             break
         elif n_repos < 100:
             if fork is not None:
-                new_repos = [repo["full_name"] for repo in res if repo["fork"] is fork]
+                new_repos = [
+                    repo["full_name"]
+                    for repo in res
+                    if repo["fork"] is fork
+                    and repo["full_name"] not in repositories_to_ignore
+                    and not repo["archived"]
+                ]
             else:
-                new_repos = [repo["full_name"] for repo in res]
+                new_repos = [
+                    repo["full_name"]
+                    for repo in res
+                    if repo["full_name"] not in repositories_to_ignore
+                    and not repo["archived"]
+                ]
 
             repos.extend(new_repos)
             break
         else:
             if fork is not None:
-                new_repos = [repo["full_name"] for repo in res if repo["fork"] is fork]
+                new_repos = [
+                    repo["full_name"]
+                    for repo in res
+                    if repo["fork"] is fork
+                    and repo["full_name"] not in repositories_to_ignore
+                    and not repo["archived"]
+                ]
             else:
-                new_repos = [repo["full_name"] for repo in res]
+                new_repos = [
+                    repo["full_name"]
+                    for repo in res
+                    if repo["full_name"] not in repositories_to_ignore
+                    and not repo["archived"]
+                ]
 
             repos.extend(new_repos)
             page += 1
-
-        time.sleep(0.1)
 
     return repos
 

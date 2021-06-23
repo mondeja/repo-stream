@@ -200,6 +200,7 @@ def update(
     usernames,
     include_forks=False,
     branch_prefix="repo-stream--",
+    repositories_to_ignore=[],
     dry_run=False,
 ):
     """Update repositories which have a repo-stream pre-commit config searching
@@ -212,13 +213,20 @@ def update(
     usernames : list
       Users for which to get repositories.
 
-    dry_run : bool, optional
-      Don't make pull requests, just prints to STDOUT when pull requests would
-      be opened.
-
     include_forks : bool, optional
       Include forks of repositories stored by the user in its Github account.
 
+    branch_prefix : str, optional
+      Branch name prefix used for creating the patches. Opened pull requests
+      will use that branch name to make changes.
+
+    repositories_to_ignore : list, optional
+      Repositories full names to ignore from being checked for repo-stream
+      pre-commit hooks.
+
+    dry_run : bool, optional
+      Don't make pull requests, just prints to STDOUT when pull requests would
+      be opened.
 
     Returns
     -------
@@ -236,6 +244,7 @@ def update(
             user_repos = get_user_repos(
                 username,
                 fork=False if not include_forks else None,
+                repositories_to_ignore=repositories_to_ignore,
             )
         except HTTPError as err:
             if err.code == 404:
@@ -249,10 +258,10 @@ def update(
             msg = f"{n_user_repos}"
             if not include_forks:
                 msg += " non forked"
-            msg += " repositories found.\n"
+            msg += " repositories will be checked.\n"
             sys.stdout.write(msg)
         else:
-            msg = "No repositories found.\n"
+            msg = "No repositories will be checked.\n"
             sys.stdout.write(msg)
             continue
 
