@@ -1,3 +1,7 @@
 """repo-stream package"""
 
-__version__ = "0.0.1"
+from repo_stream.update import update
+
+
+__all__ = ("update",)
+__version__ = "1.1.0"

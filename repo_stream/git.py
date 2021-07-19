@@ -40,7 +40,7 @@ def repo_default_branch_name(repo):
 
 
 @contextlib.contextmanager
-def tmp_repo(repo, username=None, token=None, platform="github.com"):
+def tmp_repo(repo, username=None, token=None, platform="github.com", clone_depth=1):
     """Create a temporal directory where clone a repository and move inside.
 
     Works as a context manager using ``with`` statement and when exits, comes
@@ -55,6 +55,8 @@ def tmp_repo(repo, username=None, token=None, platform="github.com"):
     platform : str
       Platform provider where the repository is hosted.
 
+    clone_depth : int
+      Number of commits to fetch cloning the repository.
 
     Yields
     ------
@@ -73,7 +75,7 @@ def tmp_repo(repo, username=None, token=None, platform="github.com"):
                     "git",
                     "clone",
                     "--quiet",
-                    "--depth=1",
+                    f"--depth={clone_depth}",
                     f"https://{auth_str}{platform}/{repo}.git",
                 ]
             )

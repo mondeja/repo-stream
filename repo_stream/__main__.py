@@ -49,12 +49,27 @@ def build_parser():
         "--ignore-repositories",
         dest="ignore_repositories",
         default=None,
+        metavar="PATH",
         help=(
             "Path to a text file with full names of repositories to ignore,"
             " separated by new lines."
         ),
     )
-    parser.add_argument("usernames", nargs="*")
+    parser.add_argument(
+        "--clone-depth",
+        dest="clone_depth",
+        default=1,
+        metavar="N",
+        help=(
+            "GIT clone depth. Is useful to increase it if you want to access"
+            " previous commits in the forked branch.",
+        ),
+    )
+    parser.add_argument(
+        "usernames",
+        nargs="*",
+        help="Github users to scan for repository updates.",
+    )
     parser.add_argument("-config", "--config", dest="ignoreme_config", default=None)
     parser.add_argument("-updater", "--updater", dest="ignoreme_updater", default=None)
 
@@ -101,6 +116,7 @@ def main():
                 include_forks=args.include_forks,
                 repositories_to_ignore=repositories_to_ignore,
                 dry_run=args.dry_run,
+                clone_depth=args.clone_depth,
             )
     except Exception:
         raise
