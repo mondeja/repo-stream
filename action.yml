@@ -11,5 +11,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: ${{ github.action_path }}/repo_stream/__main__.py ${{ inputs.usernames }} ${{ inputs.args }}
-      shell: python
+    - run: python3 -m pip install ${{ github.action_path }}
+      shell: bash
+    - run: python ${{ github.action_path }}/repo_stream/__main__.py ${{ inputs.usernames }} ${{ inputs.args }}
+      shell: bash
