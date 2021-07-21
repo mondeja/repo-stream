@@ -30,7 +30,7 @@ repositories without have to define them inside the configuration of each one.
 
 ```yaml
 - repo: https://github.com/mondeja/repo-stream
-  rev: v1.2.0
+  rev: v1.3.0
   hooks:
     - id: repo-stream
       args:
@@ -46,13 +46,13 @@ repositories without have to define them inside the configuration of each one.
 ```yaml
 repos:
   - repo: https://github.com/mondeja/pre-commit-hooks
-    rev: v1.2.0
+    rev: v1.3.0
     hooks:
       - id: add-pre-commit-hook
         args: 
           - -repo=https://github.com/mondeja/pre-commit-hooks
           - -id=dev-extras-required
-          - -rev=v1.2.0
+          - -rev=v1.3.0
 ```
 
 4. Create the cron task using some platform like Github Actions:

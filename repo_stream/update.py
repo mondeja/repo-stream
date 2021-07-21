@@ -1,6 +1,7 @@
 """repo-stream update command"""
 
 import json
+import multiprocessing
 import os
 import subprocess
 import sys
@@ -58,6 +59,27 @@ def _parse_repo_stream_hook_args(args):
     return response
 
 
+def _get_repo_tree(repo):
+    default_branch_name = repo_default_branch_name(repo)
+
+    repo_tree_url = (
+        f"https://api.github.com/repos/{repo}/git/trees/"
+        f"{default_branch_name}?recursive=0"
+    )
+    req = urllib.request.Request(repo_tree_url)
+    add_github_auth_headers(req)
+    tree_req = urllib.request.urlopen(req)
+    return (repo, json.loads(tree_req.read().decode("utf-8"))["tree"])
+
+
+def _get_file(args):
+    repo, default_branch_name, url = args
+    file_req = urllib.request.urlopen(url)
+    file_content = file_req.read().decode("utf-8")
+    pc_config = yaml.safe_load(file_content)
+    return (repo, default_branch_name, pc_config["repos"])
+
+
 def filter_repos_with_repo_stream_hook(repos):
     """Filter repositories which have a pre-commit configuration file and
     repo-stream hook defined inside it.
@@ -68,53 +90,73 @@ def filter_repos_with_repo_stream_hook(repos):
     repos : list
       Repositories of a Github user.
     """
+    sys.stdout.write("Searching repo-stream hooks...\n")
+    cpu_cores = multiprocessing.cpu_count()
+    pool = multiprocessing.Pool(processes=cpu_cores)
+
+    trees = pool.map(_get_repo_tree, repos)
+
     response = []
 
-    for repo in repos:
-        sys.stdout.write(f"Searching repo-stream hooks in {repo}\n")
+    repo_file_urls = []
+
+    for repo, tree in trees:
         default_branch_name = repo_default_branch_name(repo)
 
-        repo_tree_url = (
-            f"https://api.github.com/repos/{repo}/git/trees/"
-            f"{default_branch_name}?recursive=0"
-        )
-        req = urllib.request.Request(repo_tree_url)
-        add_github_auth_headers(req)
-        tree_req = urllib.request.urlopen(req)
-        tree_res = json.loads(tree_req.read().decode("utf-8"))
-
-        for file in tree_res["tree"]:
+        for file in tree:
             if file["path"] == ".pre-commit-config.yaml":
                 file_url = (
                     f"https://raw.githubusercontent.com/{repo}/"
                     f"{default_branch_name}/.pre-commit-config.yaml"
                 )
-
-                file_req = urllib.request.urlopen(file_url)
-                file_content = file_req.read().decode("utf-8")
-
-                pc_config = yaml.safe_load(file_content)
-
-                for pc_repo in pc_config["repos"]:
-                    if pc_repo["repo"] == "https://github.com/mondeja/repo-stream":
-                        for hook in pc_repo["hooks"]:
-                            if hook["id"] == "repo-stream":
-                                hook_args = _parse_repo_stream_hook_args(hook["args"])
-
-                                sys.stdout.write(
-                                    f" - Found: config={hook_args['config']}"
-                                    f" updater={hook_args['updater']}\n"
-                                )
-                                response.append(
-                                    {
-                                        "repo": repo,
-                                        "default_branch_name": default_branch_name,
-                                        **hook_args,
-                                    }
-                                )
+                repo_file_urls.append((repo, default_branch_name, file_url))
                 break
 
+    files_results = pool.map(_get_file, repo_file_urls)
+
+    for repo, default_branch_name, pc_repos in files_results:
+        for pc_repo in pc_repos:
+            pc_repo_full_name = repo_url_to_full_name(pc_repo["repo"])
+            if pc_repo_full_name == "mondeja/repo-stream":
+                for hook in pc_repo["hooks"]:
+                    if hook["id"] == "repo-stream":
+                        hook_args = _parse_repo_stream_hook_args(hook["args"])
+
+                        sys.stdout.write(
+                            f" - repo={repo}"
+                            f" config={hook_args['config']}"
+                            f" updater={hook_args['updater']}\n"
+                        )
+                        response.append(
+                            {
+                                "repo": repo,
+                                "default_branch_name": default_branch_name,
+                                **hook_args,
+                            }
+                        )
+
     return response
+
+
+def _get_stream_pc_config(args):
+    index, config, default_branch_name, updater, repo = args
+    try:
+        content = download_raw_githubusercontent(
+            config,
+            default_branch_name,
+            updater,
+        )
+    except HTTPError as err:
+        if err.code == 404:
+            sys.stderr.write(
+                f"Configuration repository '{config}' or"
+                f" file '{updater}.yaml' for repo-stream"
+                f" pre-commit hooks defined at '{repo}'"
+                " not found.\n"
+            )
+            return None
+        raise err
+    return (index, content)
 
 
 def get_stream_config_pre_commit_configurations(repos_stream_config):
@@ -129,23 +171,24 @@ def get_stream_config_pre_commit_configurations(repos_stream_config):
       Collected repositories with repo-stream configurations searching in
       Github repositories for users.
     """
-    for i, repo in enumerate(repos_stream_config):
-        try:
-            repos_stream_config[i]["updater_content"] = download_raw_githubusercontent(
-                repo["config"],
-                repo["default_branch_name"],
-                repo["updater"],
-            )
-        except HTTPError as err:
-            if err.code == 404:
-                sys.stderr.write(
-                    f"Configuration repository '{repo['config']}' or"
-                    f" file '{repo['updater']}.yaml' for repo-stream"
-                    f" pre-commit hooks defined at '{repo['repo']}'"
-                    " not found.\n"
-                )
-                return None
-            raise err
+    cpu_cores = multiprocessing.cpu_count()
+    if len(repos_stream_config) < cpu_cores:
+        cpu_cores = len(repos_stream_config)
+    pool = multiprocessing.Pool(processes=cpu_cores)
+
+    args = [
+        (
+            i,
+            repo["config"],
+            repo["default_branch_name"],
+            repo["updater"],
+            repo["repo"],
+        )
+        for i, repo in enumerate(repos_stream_config)
+    ]
+    results = pool.map(_get_stream_pc_config, args)
+    for i, content in results:
+        repos_stream_config[i]["updater_content"] = content
     return repos_stream_config
 
 
@@ -243,7 +286,7 @@ def update(
     gh_token = os.environ.get("GITHUB_TOKEN")
 
     for user_i, username in enumerate(usernames):
-        sys.stdout.write(f"Processing '{username}' user: ")
+        sys.stdout.write(f"Processing @{username} user: ")
         try:
             user_repos = get_user_repos(
                 username,

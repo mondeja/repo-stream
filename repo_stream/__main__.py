@@ -46,6 +46,7 @@ def build_parser():
         help="Include forked repositories getting all repositories from users.",
     )
     parser.add_argument(
+        "-I",
         "--ignore-repositories",
         dest="ignore_repositories",
         default=None,
@@ -76,27 +77,36 @@ def build_parser():
     return parser
 
 
-def main():
+def parse_args():
     parser = build_parser()
     args = parser.parse_args()
 
-    exitcode = 0
+    if not args.usernames:
+        sys.stderr.write("You must pass at least one username to scan.\n")
+        sys.exit(1)
 
+    if args.hook:
+        if not args.ignoreme_config:
+            sys.stderr.write(
+                "You must define a repository for your configuration file"
+                " using the argument '-config/--config'.\n"
+            )
+            sys.exit(1)
+        if not args.ignoreme_updater:
+            sys.stderr.write(
+                "You must define a configuration file for your updater"
+                " using the argument '-updater/--updater'.\n"
+            )
+            sys.exit(1)
+
+    return args
+
+
+def main():
+    args = parse_args()
+    exitcode = 0
     try:
-        if args.hook:
-            if not args.ignoreme_config:
-                sys.stderr.write(
-                    "You must define a repository for your configuration file"
-                    " using the argument '-config/--config'.\n"
-                )
-                exitcode = 1
-            if not args.ignoreme_updater:
-                sys.stderr.write(
-                    "You must define a configuration file for your updater"
-                    " using the argument '-updater/--updater'.\n"
-                )
-                exitcode = 1
-        else:
+        if not args.hook:
             repositories_to_ignore = []
             if args.ignore_repositories:
                 if not os.path.isfile(args.ignore_repositories):
@@ -104,7 +114,7 @@ def main():
                         f"File '{args.ignore_repositories}' defined for"
                         " '--ignore-repositories' option doesn't exists.\n"
                     )
-                    exitcode = 1
+                    sys.exit(1)
                 else:
                     with open(args.ignore_repositories) as f:
                         repositories_to_ignore.extend(

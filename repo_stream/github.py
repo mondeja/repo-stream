@@ -2,7 +2,9 @@
 
 import functools
 import json
+import multiprocessing
 import os
+import urllib.parse
 import urllib.request
 
 
@@ -24,8 +26,41 @@ def repo_url_to_full_name(url):
     return "/".join(url.split("/")[3:])
 
 
-def get_user_repos(username, fork=None, repositories_to_ignore=[]):
-    """Get all the repositories of a Github user.
+def parse_github_pagination(link_header):
+    """Discover the latest page in a Github pagination response.
+
+    Parameters
+    ----------
+
+    link_header : str
+      "Link" header returned by a Github API paginated response.
+
+    Returns
+    -------
+
+    int : Number of the latest page.
+    """
+    response = None
+
+    for urldata in link_header.split(","):
+        if urldata.split(" ")[-1].split('"')[1] == "last":
+            url = urldata.split(";")[0][1:-1]
+            response = int(
+                urllib.parse.parse_qs(urllib.parse.urlparse(url).query)["page"][0]
+            )
+            break
+    return response
+
+
+def _get_user_repos__request(url):
+    req = urllib.request.Request(url)
+    add_github_auth_headers(req)
+    req = urllib.request.urlopen(req)
+    return json.loads(req.read().decode("utf-8"))
+
+
+def get_user_repos(username, fork=None, repositories_to_ignore=[], per_page=50):
+    """Get all the repositories of a Github user giving certain conditions.
 
     Parameters
     ----------
@@ -41,69 +76,56 @@ def get_user_repos(username, fork=None, repositories_to_ignore=[]):
     repositories_to_ignore : list, optional
       Full name of repositories which will not be included in the response.
 
+    per_page : int, optional
+      Number of repositories to retrieve in each request to the Github API.
+
     Returns
     -------
 
     list : All the full names of the user repositories.
     """
-    repos = []
+    response = []
 
-    page = 1
-    while True:
-        get_user_repos_url = (
-            f"https://api.github.com/users/{username}/repos?per_page=100"
-            f"&sort=updated&page={page}&type=owner"
-            "&accept=application/vnd.github.v3+json"
-        )
+    build_url = lambda page: (
+        f"https://api.github.com/users/{username}/repos?per_page={per_page}"
+        f"&sort=updated&page={page}&type=owner"
+        "&accept=application/vnd.github.v3+json"
+    )
 
-        req = urllib.request.Request(get_user_repos_url)
-        add_github_auth_headers(req)
-        req = urllib.request.urlopen(req)
-        res = json.loads(req.read().decode("utf-8"))
+    req = urllib.request.Request(build_url(1))
+    add_github_auth_headers(req)
+    req = urllib.request.urlopen(req)
+    link_header = req.getheader("Link")
+    last = 1 if not link_header else parse_github_pagination(link_header)
+    repos = json.loads(req.read().decode("utf-8"))
 
-        n_repos = len(res)
-        if not n_repos:
-            break
-        elif n_repos < 100:
-            if fork is not None:
-                new_repos = [
-                    repo["full_name"]
-                    for repo in res
-                    if repo["fork"] is fork
-                    and repo["full_name"] not in repositories_to_ignore
-                    and not repo["archived"]
-                ]
-            else:
-                new_repos = [
-                    repo["full_name"]
-                    for repo in res
-                    if repo["full_name"] not in repositories_to_ignore
-                    and not repo["archived"]
-                ]
+    def is_valid_repo(repo_data):
+        if fork is not None:
+            if repo["fork"] is not fork:
+                return False  # booleans must match for this filter
+        if repo_data["archived"]:
+            return False
+        if repo_data["full_name"] in repositories_to_ignore:
+            return False
+        return True
 
-            repos.extend(new_repos)
-            break
-        else:
-            if fork is not None:
-                new_repos = [
-                    repo["full_name"]
-                    for repo in res
-                    if repo["fork"] is fork
-                    and repo["full_name"] not in repositories_to_ignore
-                    and not repo["archived"]
-                ]
-            else:
-                new_repos = [
-                    repo["full_name"]
-                    for repo in res
-                    if repo["full_name"] not in repositories_to_ignore
-                    and not repo["archived"]
-                ]
+    for repo in repos:
+        if is_valid_repo(repo):
+            response.append(repo["full_name"])
 
-            repos.extend(new_repos)
-            page += 1
+    if last > 1:
+        num_cores = multiprocessing.cpu_count()
+        if last - 1 < num_cores:
+            num_cores = last - 1
+        pool = multiprocessing.Pool(processes=num_cores)
 
-    return repos
+        urls = [build_url(page) for page in range(2, last + 1)]
+        for repos in pool.map(_get_user_repos__request, urls):
+            for repo in repos:
+                if is_valid_repo(repo):
+                    response.append(repo["full_name"])
+
+    return response
 
 
 def add_github_auth_headers(req):

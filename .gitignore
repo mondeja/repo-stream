@@ -4,6 +4,7 @@
 /dev.md
 __dev__.py
 repositories-to-ignore.txt
+*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
