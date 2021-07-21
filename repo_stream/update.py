@@ -173,7 +173,7 @@ def get_stream_config_pre_commit_configurations(repos_stream_config):
     """
     cpu_cores = multiprocessing.cpu_count()
     if len(repos_stream_config) < cpu_cores:
-        cpu_cores = len(repos_stream_config)
+        cpu_cores = len(repos_stream_config) or 1
     pool = multiprocessing.Pool(processes=cpu_cores)
 
     args = [
