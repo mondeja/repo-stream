@@ -1,0 +1,15 @@
+name: repo-stream
+description: 'Cron-based remote pre-commit executions by opening pull requests.'
+inputs:
+  usernames:
+    description: 'Usernames to scan for repo-stream pre-commit hooks.'
+    required: true
+  args:
+    description: 'Additional optional arguments passed to repo-stream script.'
+    required: False
+
+runs:
+  using: "composite"
+  steps:
+    - run: ${{ github.action_path }}/repo_stream/__main__.py ${{ inputs.usernames }} ${{ inputs.args }}
+      shell: python

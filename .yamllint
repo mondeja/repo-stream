@@ -32,9 +32,12 @@ rules:
       .pre-commit-config.yaml
       .pre-commit-hooks.yaml
       .github
+      action.yml
   line-length:
     allow-non-breakable-words: true
     max: 96
+    ignore: |
+      action.yml
   new-lines:
     type: unix
   octal-values:
@@ -48,5 +51,7 @@ rules:
       - \d\d:\d\d
     quote-type: single
     required: only-when-needed
+    ignore: |
+      action.yml
   trailing-spaces: enable
   truthy: disable
