@@ -88,6 +88,34 @@ jobs:
 - If you want to update other repositories not published under your user, pass
 them as parameters of `repo-stream <your-username> <other-username>`.
 
+> Consult `repo-stream --help` for documentation about valid arguments.
+
+### Usage as Github Action
+
+```yaml
+name: repo-stream update
+
+on:
+  schedule:
+    - cron: 0 4 1/7 * *
+  workflow_dispatch:
+
+jobs:
+  repo-stream-update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - uses: mondeja/repo-stream@v1.3.0
+        with:
+          usernames: <your-username> <other-username>
+          args: --dry-run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_USERNAME: <your-username>
+```
+
 ## Current limitations
 
 - Only works with Github repositories.
