@@ -81,10 +81,6 @@ def parse_args():
     parser = build_parser()
     args = parser.parse_args()
 
-    if not args.usernames:
-        sys.stderr.write("You must pass at least one username to scan.\n")
-        sys.exit(1)
-
     if args.hook:
         if not args.ignoreme_config:
             sys.stderr.write(
@@ -97,6 +93,10 @@ def parse_args():
                 "You must define a configuration file for your updater"
                 " using the argument '-updater/--updater'.\n"
             )
+            sys.exit(1)
+    else:
+        if not args.usernames:
+            sys.stderr.write("You must pass at least one username to scan.\n")
             sys.exit(1)
 
     return args
@@ -114,7 +114,7 @@ def main():
                         f"File '{args.ignore_repositories}' defined for"
                         " '--ignore-repositories' option doesn't exists.\n"
                     )
-                    sys.exit(1)
+                    return 1
                 else:
                     with open(args.ignore_repositories) as f:
                         repositories_to_ignore.extend(
@@ -135,4 +135,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())

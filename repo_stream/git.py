@@ -7,7 +7,7 @@ import tempfile
 import uuid
 
 
-def repo_default_branch_name(repo):
+def repo_default_branch_name(repo, protocol="https"):
     """Get the default branch name of a remote repository.
 
     Parameters
@@ -15,6 +15,8 @@ def repo_default_branch_name(repo):
 
     repo : str
       Github repository owner and name, in the form ``"<username>/<project>"``.
+    protocol: str
+      Procotol connecting to Github.
 
     Returns
     -------
@@ -27,9 +29,10 @@ def repo_default_branch_name(repo):
                 "git",
                 "ls-remote",
                 "--symref",
-                f"https://github.com/{repo}",
+                f"{protocol}://github.com/{repo}",
                 "HEAD",
-            ]
+            ],
+            stderr=subprocess.DEVNULL,
         )
         .decode("utf-8")
         .splitlines()[0]

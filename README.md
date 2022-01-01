@@ -33,7 +33,7 @@ repositories without have to define them inside the configuration of each one.
 
    ```yaml
    - repo: https://github.com/mondeja/repo-stream
-     rev: v1.3.0
+     rev: v1.3.1
      hooks:
        - id: repo-stream
          args:
@@ -115,7 +115,7 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.x
-      - uses: mondeja/repo-stream@v1.3.0
+      - uses: mondeja/repo-stream@v1.3.1
         with:
           usernames: <your-username> <other-username>
           args: --dry-run
